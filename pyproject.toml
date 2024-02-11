@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jakarta"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+    "ast-grep-py>=0.15",
+    "pure-cdb>=4.0",
+]
+authors = [
+    { name = "Grzegorz Blach" },
+]
+description = ""
+readme = "README.md"
+license = { text = "MPL-2.0" }
+keywords = [ "gettext", "l10n", "localization", "i18n", "translate" ]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Internationalization",
+    "Topic :: Software Development :: Localization",
+]
+
+[project.optional-dependencies]
+online = [
+    "requests>=2.30.0",
+]
+
+[project.scripts]
+jakarta = "jakarta.__main__:main"
+
+[project.urls]
+Repository = "https://codeberg.org/gblach/jakarta"
+Issues = "https://codeberg.org/gblach/jakarta/issues"

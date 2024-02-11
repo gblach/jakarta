@@ -1,0 +1,13 @@
+matrix:
+  VERSION: [3.11, 3.12]
+
+steps:
+  test:
+    image: python:${VERSION}
+    commands:
+      - python -mvenv .venv
+      - . .venv/bin/activate
+      - pip install --upgrade pip
+      - pip install '.[online]'
+      - pip install pytest
+      - pytest -v
