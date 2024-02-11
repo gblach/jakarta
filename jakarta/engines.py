@@ -1,5 +1,6 @@
 from string import Template
 from requests import request
+from requests.exceptions import *
 
 ENGINES = {
 	'lingva': {
@@ -61,6 +62,10 @@ def translate(config: str, lang: str, text: str):
 				text=text,
 			)
 	headers = { 'Content-Type': 'application/json; charset=utf-8' }
-	r = request(engine['method'], url, headers=headers, params=params, json=body)
-	if r.status_code == 200:
-		return r.json()[engine['json_key']]
+	try:
+		r = request(engine['method'], url, timeout=30, \
+			headers=headers, params=params, json=body)
+		if r.status_code == 200:
+			return r.json()[engine['json_key']]
+	except ReadTimeout:
+		pass
