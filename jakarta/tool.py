@@ -121,8 +121,9 @@ class Tool:
 			if data['_type'] == Type.SIMPLE:
 				f.write(f'en = "{text}"\n')
 			elif data['_type'] == Type.PLURAL:
+				plural = data['_plural']
 				f.write(f'en.one = "{text}"\n')
-				f.write(f'en.other = "{data['_plural']}"\n')
+				f.write(f'en.other = "{plural}"\n')
 			elif data['_type'] == Type.ORDINAL:
 				f.write(f'en.ord = "{text}"\n')
 			for lang, data1 in data.items():
