@@ -5,11 +5,8 @@ import importlib.util
 import ast_grep_py
 import cdblib
 from enum import Enum
+from . import engines
 from . import generated as gen
-
-has_requests = importlib.util.find_spec('requests')
-if has_requests:
-	from . import engines
 
 class Type(Enum):
 	SIMPLE = 1
@@ -185,9 +182,7 @@ class Tool:
 		if os.path.isfile(self.config['jafile']):
 			self.load()
 		self.extract()
-		if has_requests \
-			and 'translate-to' in self.config \
-			and 'translation-engine' in self.config:
-				self.translate()
+		if 'translate-to' in self.config and 'translation-engine' in self.config:
+			self.translate()
 		self.generate()
 		return self.compile()

@@ -7,7 +7,6 @@ name = "jakarta"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
-    "ast-grep-py>=0.15",
     "pure-cdb>=4.0",
 ]
 authors = [
@@ -28,7 +27,8 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
-online = [
+tool = [
+    "ast-grep-py>=0.15",
     "requests>=2.30.0",
 ]
 

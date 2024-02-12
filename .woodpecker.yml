@@ -8,6 +8,6 @@ steps:
       - python -mvenv .venv
       - . .venv/bin/activate
       - pip install --upgrade pip
-      - pip install '.[online]'
+      - pip install '.[tool]'
       - pip install pytest
       - pytest -v
