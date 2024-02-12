@@ -67,20 +67,28 @@ class Tool:
 				self.map[text]['_plural'] = plural
 
 	def translate(self):
+		translated = 0
 		for text, data in self.map.items():
 			if data['_type'] == Type.SIMPLE:
 				for lang in self.config['translate-to']:
 					if lang not in self.map[text]:
 						self.translate_simple(lang, text)
+						print('.', end='', flush=True)
+						translated += 1
 			elif data['_type'] == Type.PLURAL:
 				plural = data['_plural']
 				for lang in self.config['translate-to']:
 					if lang not in self.map[text]:
 						self.translate_plural(lang, text, plural)
+						print('.', end='', flush=True)
+						translated += 1
 			elif data['_type'] == Type.ORDINAL:
 				for lang in self.config['translate-to']:
 					if lang not in self.map[text]:
 						self.translate_oridnal(lang, text)
+						print('.', end='', flush=True)
+						translated += 1
+		if translated: print('')
 
 	def translate_simple(self, lang, text):
 		translation = engines.translate(self.config, lang, text)
