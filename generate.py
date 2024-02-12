@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+#  This Source Code Form is subject to the terms of the Mozilla Public
+#  License, v. 2.0. If a copy of the MPL was not distributed with this
+#  file, You can obtain one at https://mozilla.org/MPL/2.0/.
+
 import argparse, datetime, re
 import requests
 
@@ -160,6 +164,11 @@ if __name__ == '__main__':
 		quit(2)
 
 	f = open(files[args.syntax], 'w')
+	f.write('%s  This Source Code Form is subject to the terms of the Mozilla Public\n'
+		% s['comment'])
+	f.write('%s  License, v. 2.0. If a copy of the MPL was not distributed with this\n'
+		% s['comment'])
+	f.write('%s  file, You can obtain one at https://mozilla.org/MPL/2.0/.\n\n' % s['comment'])
 	f.write('%s %s\n\n' % (s['comment'], datetime.date.today()))
 
 	write_function(f, s, plurals)
