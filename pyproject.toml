@@ -13,7 +13,7 @@ dependencies = [
 authors = [
     { name = "Grzegorz Blach" },
 ]
-description = ""
+description = "Localization framework with support for automatic online translation"
 readme = "README.md"
 license = { text = "MPL-2.0" }
 keywords = [ "gettext", "l10n", "localization", "i18n", "translate" ]
