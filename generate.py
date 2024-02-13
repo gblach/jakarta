@@ -5,9 +5,9 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import argparse, datetime, re
-import requests
+import glob, json, os, subprocess
 
-repo = 'https://raw.githubusercontent.com/unicode-org/cldr-json/main'
+repo = 'https://github.com/unicode-org/cldr-json.git'
 
 files = {
 	'python': 'jakarta/generated.py',
@@ -15,8 +15,8 @@ files = {
 
 syntax = {
 	'python': {
-		'func_begin_1': 'def {}(lang: str, n: float) -> str:',
-		'func_begin_2': 'def {}(lang: str) -> list:',
+		'func_begin_lang_n_str': 'def {}(lang: str, n: float) -> str:',
+		'func_begin_lang_list': 'def {}(lang: str) -> list:',
 		'n_to_i': 'i = int(n)',
 		'plurals_math': [
 			'if i == n:',
@@ -50,6 +50,16 @@ ne_re = re.compile(r' != ([\((range)])')
 ne_sub = r' not in \1'
 number_re = re.compile(r'([\d\.]+)[\~\,\s]*([\d\.]*)')
 
+def repo_clone_update():
+	if not os.path.isdir('.cldr-json'):
+		subprocess.run(['git', 'clone', '--depth', '1', repo, '.cldr-json'], check=True)
+	else:
+		os.chdir('.cldr-json')
+		subprocess.run(['git', 'pull'], check=True)
+		os.chdir('..')
+
+### form
+
 def rewrite_rule(rule):
 	rule = rule.split(' @')[0].replace(' = ', ' == ')
 	while m := list_re.search(rule):
@@ -65,81 +75,83 @@ def rewrite_rule(rule):
 	rule = ne_re.sub(ne_sub, rule)
 	return rule
 
-def write_function(f, s, cldr):
+def write_form(f, s, cldr):
 	cldr_type = func_name = ''
 	if 'plurals-type-cardinal' in cldr.keys():
 		cldr_type = 'plurals-type-cardinal'
-		func_name = 'plurals'
+		func_name = 'plural_form'
 	if 'plurals-type-ordinal' in cldr.keys():
 		cldr_type = 'plurals-type-ordinal'
-		func_name = 'ordinals'
+		func_name = 'ordinal_form'
 
-	f.write(s['func_begin_1'].format(func_name) + '\n')
+	f.write(s['func_begin_lang_n_str'].format(func_name) + '\n')
 	f.write('\t' + s['n_to_i'] + '\n')
 	if cldr_type == 'plurals-type-cardinal':
 		for line in s['plurals_math']:
 			f.write('\t' + line + '\n')
 
 	f.write('\t' + s['lang_replace'] + '\n')
-	for lang, values in cldr[cldr_type].items():
+	for lang, data in cldr[cldr_type].items():
 		if '-' in lang:
 			f.write('\t' + s['if_lang'].format(lang) + '\n')
-			for label, rule in values.items():
+			for form, rule in data.items():
 				rule = rewrite_rule(rule)
 				if rule: f.write('\t\t' + s['if_rule'].format(rule) + ' ')
 				else: f.write('\t\t')
-				f.write(s['return_str'].format(label[17:]) + '\n')
+				f.write(s['return_str'].format(form[17:]) + '\n')
 
 	i = 0
 	f.write('\t' + s['lang_cut'] + '\n')
-	for lang, values in cldr[cldr_type].items():
-		if '-' not in lang and len(values) > 1:
+	for lang, data in cldr[cldr_type].items():
+		if '-' not in lang and len(data) > 1:
 			if i == 0: f.write('\t' + s['if_lang'].format(lang) + '\n')
 			else: f.write('\t' + s['elif_lang'].format(lang) + '\n')
-			for label, rule in values.items():
-				if label[17:] != 'other':
+			for form, rule in data.items():
+				if form[17:] != 'other':
 					rule = rewrite_rule(rule)
 					f.write('\t\t' + s['if_rule'].format(rule) + ' ')
-					f.write(s['return_str'].format(label[17:]) + '\n')
+					f.write(s['return_str'].format(form[17:]) + '\n')
 			i += 1
 
 	f.write('\t' + s['return_str'].format('other') + '\n')
 	f.write(s['block_end'] + '\n')
 
-def write_rules_function_rules(lang, values):
-	rules = []
-	for name, rule in values.items():
-		if n:= number_re.search(rule.split(' @')[1]):
+### samples
+
+def get_samples(lang, data):
+	samples = []
+	for form, sample in data.items():
+		if n:= number_re.search(sample.split(' @')[1]):
 			number = float(n.group(1))
 			if number == 0 and n.group(2) != '': number = float(n.group(2))
 			if number == int(number): number = int(number)
-			rules.append((name[17:], number))
-	return rules
+			samples.append((form[17:], number))
+	return samples
 
-def write_rules_function(f, s, cldr):
+def write_samples(f, s, cldr):
 	cldr_type = func_name = ''
 	if 'plurals-type-cardinal' in cldr.keys():
 		cldr_type = 'plurals-type-cardinal'
-		func_name = 'plural_rules'
+		func_name = 'plural_samples'
 	if 'plurals-type-ordinal' in cldr.keys():
 		cldr_type = 'plurals-type-ordinal'
-		func_name = 'ordinal_rules'
+		func_name = 'ordinal_samples'
 
-	f.write(s['func_begin_2'].format(func_name) + '\n')
+	f.write(s['func_begin_lang_list'].format(func_name) + '\n')
 
 	f.write('\t' + s['lang_replace'] + '\n')
-	for lang, values in cldr[cldr_type].items():
+	for lang, data in cldr[cldr_type].items():
 		if '-' in lang:
-			rules = write_rules_function_rules(lang, values)
+			samples = get_samples(lang, data)
 			f.write('\t' + s['if_lang'].format(lang) + ' ')
-			f.write(s['return_list'].format(rules) + '\n')
+			f.write(s['return_list'].format(samples) + '\n')
 
 	f.write('\t' + s['lang_cut'] + '\n')
-	for lang, values in cldr[cldr_type].items():
+	for lang, data in cldr[cldr_type].items():
 		if '-' not in lang:
-			rules = write_rules_function_rules(lang, values)
+			samples = get_samples(lang, data)
 			f.write('\t' + s['if_lang'].format(lang) + ' ')
-			f.write(s['return_list'].format(rules) + '\n')
+			f.write(s['return_list'].format(samples) + '\n')
 
 	f.write('\t' + s['return_list'].format([]) + '\n')
 	f.write(s['block_end'] + '\n')
@@ -154,14 +166,7 @@ if __name__ == '__main__':
 	else:
 		quit(1)
 
-	plurals = requests.get(repo + '/cldr-json/cldr-core/supplemental/plurals.json')
-	ordinals = requests.get(repo + '/cldr-json/cldr-core/supplemental/ordinals.json')
-
-	if plurals.status_code == 200 and ordinals.status_code == 200:
-		plurals = plurals.json()['supplemental']
-		ordinals = ordinals.json()['supplemental']		
-	else:
-		quit(2)
+	repo_clone_update()
 
 	f = open(files[args.syntax], 'w')
 	f.write('%s  This Source Code Form is subject to the terms of the Mozilla Public\n'
@@ -171,7 +176,12 @@ if __name__ == '__main__':
 	f.write('%s  file, You can obtain one at https://mozilla.org/MPL/2.0/.\n\n' % s['comment'])
 	f.write('%s %s\n\n' % (s['comment'], datetime.date.today()))
 
-	write_function(f, s, plurals)
-	write_function(f, s, ordinals)
-	write_rules_function(f, s, plurals)
-	write_rules_function(f, s, ordinals)
+	plurals_file = '.cldr-json/cldr-json/cldr-core/supplemental/plurals.json'
+	ordinals_file = '.cldr-json/cldr-json/cldr-core/supplemental/ordinals.json'
+	plurals = json.load(open(plurals_file))['supplemental']
+	ordinals = json.load(open(ordinals_file))['supplemental']
+
+	write_form(f, s, plurals)
+	write_form(f, s, ordinals)
+	write_samples(f, s, plurals)
+	write_samples(f, s, ordinals)

@@ -95,12 +95,12 @@ def test_pl_ordinals(cdbfile):
 	assert ja.o('Take the {} right.', 3) == 'Skręć w 3. w prawo.'
 	assert ja.o('Take the {} right.', 4) == 'Skręć w 4. w prawo.'
 
-def test_plural_rules():
-	assert gen.plural_rules('en') == [('one', 1), ('other', 2)]
-	assert gen.plural_rules('pl') == [('one', 1), ('few', 2), ('many', 5), ('other', 1.5)]
-	assert gen.plural_rules('xx') == []
+def test_plural_samples():
+	assert gen.plural_samples('en') == [('one', 1), ('other', 2)]
+	assert gen.plural_samples('pl') == [('one', 1), ('few', 2), ('many', 5), ('other', 1.5)]
+	assert gen.plural_samples('xx') == []
 
-def test_ordinal_rules():
-	assert gen.ordinal_rules('en') == [('one', 1), ('two', 2), ('few', 3), ('other', 4)]
-	assert gen.ordinal_rules('pl') == [('other', 15)]
-	assert gen.ordinal_rules('xx') == []
+def test_ordinal_samples():
+	assert gen.ordinal_samples('en') == [('one', 1), ('two', 2), ('few', 3), ('other', 4)]
+	assert gen.ordinal_samples('pl') == [('other', 15)]
+	assert gen.ordinal_samples('xx') == []

@@ -2,9 +2,9 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-# 2024-02-12
+# 2024-02-13
 
-def plurals(lang: str, n: float) -> str:
+def plural_form(lang: str, n: float) -> str:
 	i = int(n)
 	if i == n:
 		f = t = v = w = 0
@@ -463,7 +463,7 @@ def plurals(lang: str, n: float) -> str:
 		if i == 0 or n == 1: return "one"
 	return "other"
 
-def ordinals(lang: str, n: float) -> str:
+def ordinal_form(lang: str, n: float) -> str:
 	i = int(n)
 	lang = lang.replace("_", "-")
 	lang = lang.split("-")[0]
@@ -583,7 +583,7 @@ def ordinals(lang: str, n: float) -> str:
 		if n == 1: return "one"
 	return "other"
 
-def plural_rules(lang: str) -> list:
+def plural_samples(lang: str) -> list:
 	lang = lang.replace("_", "-")
 	if lang == "pt-PT": return [('one', 1), ('many', 1000000), ('other', 2)]
 	lang = lang.split("-")[0]
@@ -805,7 +805,7 @@ def plural_rules(lang: str) -> list:
 	if lang == "zu": return [('one', 1), ('other', 2)]
 	return []
 
-def ordinal_rules(lang: str) -> list:
+def ordinal_samples(lang: str) -> list:
 	lang = lang.replace("_", "-")
 	lang = lang.split("-")[0]
 	if lang == "af": return [('other', 15)]

@@ -94,7 +94,7 @@ class Tool:
 		if translation: self.map[text][lang] = translation
 
 	def translate_plural(self, lang, text, plural):
-		for (form, n) in gen.plural_rules(lang):
+		for (form, n) in gen.plural_samples(lang):
 			if n == 1: translate = text.format(n)
 			else: translate = plural.format(n)
 			translation = engines.translate(self.config, lang, translate)
@@ -105,7 +105,7 @@ class Tool:
 					.replace(str(n).replace('.', ','), '{}')
 
 	def translate_oridnal(self, lang, text):
-		for (form, n) in gen.ordinal_rules(lang):
+		for (form, n) in gen.ordinal_samples(lang):
 			if n % 10 == 1 and n % 100 != 11: translate = text.format(f'{n}st')
 			elif n % 10 == 2 and n % 100 != 12: translate = text.format(f'{n}nd')
 			elif n % 10 == 3 and n % 100 != 13: translate = text.format(f'{n}rd')
@@ -154,12 +154,12 @@ class Tool:
 					f.write(f'{lang} = ""\n')
 			elif data['_type'] == Type.PLURAL:
 				if lang not in data: data[lang] = {}
-				for (form, n) in gen.plural_rules(lang):
+				for (form, n) in gen.plural_samples(lang):
 					if form not in data[lang].keys():
 						f.write(f'{lang}.{form} = ""\n')
 			elif data['_type'] == Type.ORDINAL:
 				if lang not in data: data[lang] = {}
-				for (form, n) in gen.ordinal_rules(lang):
+				for (form, n) in gen.ordinal_samples(lang):
 					if form not in data[lang].keys():
 						f.write(f'{lang}.{form} = ""\n')
 

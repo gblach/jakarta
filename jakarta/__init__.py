@@ -22,7 +22,7 @@ class Jakarta:
 
 	def p(self, one, other, n):
 		for lang in self.langs:
-			form = gen.plurals(lang, n)
+			form = gen.plural_form(lang, n)
 			key = f'{lang}.{form}:{one}'.encode()
 			if key in self.map: return self.map[key].decode().format(n)
 		if n == 1: return one.format(n)
@@ -30,7 +30,7 @@ class Jakarta:
 
 	def o(self, one, n):
 		for lang in self.langs:
-			form = gen.ordinals(lang, n)
+			form = gen.ordinal_form(lang, n)
 			key = f'{lang}.{form}:{one}'.encode()
 			if key in self.map: return self.map[key].decode().format(n)
 		if n % 10 == 1 and n % 100 != 11: return one.format(f'{n}st')
