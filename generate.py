@@ -17,6 +17,7 @@ syntax = {
 	'python': {
 		'func_begin_lang_n_str': 'def {}(lang: str, n: float) -> str:',
 		'func_begin_lang_list': 'def {}(lang: str) -> list:',
+		'func_begin_lang_dict': 'def {}(lang: str) -> dict:',
 		'n_to_i': 'i = int(n)',
 		'plurals_math': [
 			'if i == n:',
@@ -34,6 +35,7 @@ syntax = {
 		'if_rule': 'if {}:',
 		'return_str': 'return "{}"',
 		'return_list': 'return {}',
+		'return_map': 'return {}',
 		'block_end': '',
 		'comment': '#',
 	},
@@ -156,6 +158,37 @@ def write_samples(f, s, cldr):
 	f.write('\t' + s['return_list'].format([]) + '\n')
 	f.write(s['block_end'] + '\n')
 
+### format number
+
+def get_number_symbols(lang, path):
+	file = os.path.sep.join([path, 'numbers.json'])
+	symbols = json.load(open(file))['main'][lang]['numbers']['symbols-numberSystem-latn']
+	return {
+		'decimal': symbols['decimal'],
+		'group': symbols['group'],
+	}
+
+def write_number_symbols(f, s, directory):
+	f.write(s['func_begin_lang_dict'].format('number_symbols') + '\n')
+
+	f.write('\t' + s['lang_replace'] + '\n')
+	for path in glob.iglob(directory + '/*'):
+		lang = os.path.basename(path)
+		if '-' in lang:
+			symbols = get_number_symbols(lang, path)
+			f.write('\t' + s['if_lang'].format(lang) + ' ')
+			f.write(s['return_map'].format(symbols) + '\n')
+
+	f.write('\t' + s['lang_cut'] + '\n')
+	for path in glob.iglob(directory + '/*'):
+		lang = os.path.basename(path)
+		if '-' not in lang:
+			symbols = get_number_symbols(lang, path)
+			f.write('\t' + s['if_lang'].format(lang) + ' ')
+			f.write(s['return_map'].format(symbols) + '\n')
+
+	f.write(s['block_end'] + '\n')
+
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('syntax')
@@ -185,3 +218,4 @@ if __name__ == '__main__':
 	write_form(f, s, ordinals)
 	write_samples(f, s, plurals)
 	write_samples(f, s, ordinals)
+	write_number_symbols(f, s, '.cldr-json/cldr-json/cldr-numbers-modern/main')

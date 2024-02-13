@@ -104,3 +104,21 @@ def test_ordinal_samples():
 	assert gen.ordinal_samples('en') == [('one', 1), ('two', 2), ('few', 3), ('other', 4)]
 	assert gen.ordinal_samples('pl') == [('other', 15)]
 	assert gen.ordinal_samples('xx') == []
+
+def test_number_format():
+	ja = Jakarta()
+	ja.set_langs('en')
+	assert ja.n(123456789) == '123,456,789'
+	assert ja.n(1234567.89) == '1,234,567.89'
+	ja.set_langs('pl')
+	assert ja.n(123456789) == '123\xa0456\xa0789'
+	assert ja.n(1234567.89) == '1\xa0234\xa0567,89'
+	ja.set_langs('de')
+	assert ja.n(123456789) == '123.456.789'
+	assert ja.n(1234567.89) == '1.234.567,89'
+	ja.set_langs('fr')
+	assert ja.n(123456789) == '123\u202f456\u202f789'
+	assert ja.n(1234567.89) == '1\u202f234\u202f567,89'
+	ja.set_langs('xx')
+	assert ja.n(123456789) == '123,456,789'
+	assert ja.n(1234567.89) == '1,234,567.89'

@@ -6,9 +6,12 @@ import cdblib
 from . import generated as gen
 
 class Jakarta:
-	def __init__(self, fn):
-		data = open(fn, 'rb').read()
-		self.map = cdblib.Reader(data)
+	def __init__(self, cdbfile=None):
+		if cdbfile:
+			data = open(cdbfile, 'rb').read()
+			self.map = cdblib.Reader(data)
+		else:
+			self.map = {}
 		self.langs = []
 
 	def set_langs(self, *langs):
@@ -37,3 +40,23 @@ class Jakarta:
 		elif n % 10 == 2 and n % 100 != 12: return one.format(f'{n}nd')
 		elif n % 10 == 3 and n % 100 != 13: return one.format(f'{n}rd')
 		return one.format(f'{n}th')
+
+	def n(self, n):
+		for lang in self.langs:
+			symbols = gen.number_symbols(lang)
+			if symbols: break
+		if not symbols: symbols = gen.number_symbols('en')
+		if n == int(n):
+			istr = str(n)
+			fstr = ''
+		else:
+			(istr, fstr) = str(n).split('.')
+		istr_len = len(istr)
+		retval = ''
+		for pos in range(istr_len):
+			if retval and 0 == (istr_len - pos) % 3:
+				retval += symbols['group']
+			retval += istr[pos]
+		if fstr:
+			retval += symbols['decimal'] + fstr
+		return retval
