@@ -1,3 +1,8 @@
+jakarta.toml
+*.ja
+*.ja.cdb
+.cldr-json
+
 # ---> Python
 # Byte-compiled / optimized / DLL files
 __pycache__/
