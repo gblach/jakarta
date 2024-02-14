@@ -38,3 +38,6 @@ jakarta = "jakarta.__main__:main"
 [project.urls]
 Repository = "https://codeberg.org/gblach/jakarta"
 Issues = "https://codeberg.org/gblach/jakarta/issues"
+
+[tool.setuptools]
+packages = ["jakarta"]
