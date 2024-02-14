@@ -2,7 +2,7 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-# 2024-02-13
+#  2024-02-14
 
 def plural_form(lang: str, n: float) -> str:
 	i = int(n)
@@ -92,7 +92,7 @@ def plural_form(lang: str, n: float) -> str:
 	elif lang == "cs":
 		if i == 1 and v == 0: return "one"
 		if (2 <= i and i <= 4) and v == 0: return "few"
-		if v != 0  : return "many"
+		if v != 0: return "many"
 	elif lang == "cy":
 		if n == 0: return "zero"
 		if n == 1: return "one"
@@ -164,7 +164,7 @@ def plural_form(lang: str, n: float) -> str:
 		if v == 0 and i % 10 == 1: return "one"
 		if v == 0 and i % 10 == 2: return "two"
 		if v == 0 and (i % 100 == 0 or i % 100 == 20 or i % 100 == 40 or i % 100 == 60 or i % 100 == 80): return "few"
-		if v != 0  : return "many"
+		if v != 0: return "many"
 	elif lang == "ha":
 		if n == 1: return "one"
 	elif lang == "haw":
@@ -248,7 +248,7 @@ def plural_form(lang: str, n: float) -> str:
 	elif lang == "lt":
 		if n % 10 == 1 and (n % 100 < 11 or 19 < n % 100): return "one"
 		if (2 <= n % 10 and n % 10 <= 9) and (n % 100 < 11 or 19 < n % 100): return "few"
-		if f != 0  : return "many"
+		if f != 0: return "many"
 	elif lang == "lv":
 		if n % 10 == 0 or (11 <= n % 100 and n % 100 <= 19) or v == 2 and (11 <= f % 100 and f % 100 <= 19): return "zero"
 		if n % 10 == 1 and n % 100 != 11 or v == 2 and f % 10 == 1 and f % 100 != 11 or v != 2 and f % 10 == 1: return "one"
@@ -367,7 +367,7 @@ def plural_form(lang: str, n: float) -> str:
 	elif lang == "sk":
 		if i == 1 and v == 0: return "one"
 		if (2 <= i and i <= 4) and v == 0: return "few"
-		if v != 0  : return "many"
+		if v != 0: return "many"
 	elif lang == "sl":
 		if v == 0 and i % 100 == 1: return "one"
 		if v == 0 and i % 100 == 2: return "two"
@@ -1308,4 +1308,3 @@ def number_symbols(lang: str) -> dict:
 	if lang == "yue": return {'decimal': '.', 'group': ','}
 	if lang == "zh": return {'decimal': '.', 'group': ','}
 	if lang == "zu": return {'decimal': '.', 'group': ','}
-

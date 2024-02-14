@@ -6,39 +6,13 @@
 
 import argparse, datetime, re
 import glob, json, os, subprocess
+from mako.template import Template
+from mako.lookup import TemplateLookup
 
 repo = 'https://github.com/unicode-org/cldr-json.git'
 
 files = {
 	'python': 'jakarta/generated.py',
-}
-
-syntax = {
-	'python': {
-		'func_begin_lang_n_str': 'def {}(lang: str, n: float) -> str:',
-		'func_begin_lang_list': 'def {}(lang: str) -> list:',
-		'func_begin_lang_dict': 'def {}(lang: str) -> dict:',
-		'n_to_i': 'i = int(n)',
-		'plurals_math': [
-			'if i == n:',
-			'\tf = t = v = w = 0',
-			'else:',
-			'\tfstr = str(n).split(".")[1]',
-			'\tf = t = int(fstr)',
-			'\tv = w = len(fstr)',
-			'c = e = 0',
-		],
-		'lang_replace': 'lang = lang.replace("_", "-")',
-		'lang_cut': 'lang = lang.split("-")[0]',
-		'if_lang': 'if lang == "{}":',
-		'elif_lang': 'elif lang == "{}":',
-		'if_rule': 'if {}:',
-		'return_str': 'return "{}"',
-		'return_list': 'return {}',
-		'return_map': 'return {}',
-		'block_end': '',
-		'comment': '#',
-	},
 }
 
 list_re = re.compile(r'([a-z](\s%\s\d+)*) ([!=]+) ([\d\.]+(\,[\d\.]+)+)')
@@ -75,52 +49,36 @@ def rewrite_rule(rule):
 	rule = range_ne_re.sub(range_ne_sub, rule)
 	rule = eq_re.sub(eq_sub, rule)
 	rule = ne_re.sub(ne_sub, rule)
-	return rule
+	return rule.strip()
 
-def write_form(f, s, cldr):
-	cldr_type = func_name = ''
+def gen_form(cldr):
+	output = {
+		'part0': {},
+		'part1': {},
+	}
+
 	if 'plurals-type-cardinal' in cldr.keys():
 		cldr_type = 'plurals-type-cardinal'
-		func_name = 'plural_form'
+		output['func_name'] = 'plural_form'
 	if 'plurals-type-ordinal' in cldr.keys():
 		cldr_type = 'plurals-type-ordinal'
-		func_name = 'ordinal_form'
+		output['func_name'] = 'ordinal_form'
 
-	f.write(s['func_begin_lang_n_str'].format(func_name) + '\n')
-	f.write('\t' + s['n_to_i'] + '\n')
-	if cldr_type == 'plurals-type-cardinal':
-		for line in s['plurals_math']:
-			f.write('\t' + line + '\n')
-
-	f.write('\t' + s['lang_replace'] + '\n')
 	for lang, data in cldr[cldr_type].items():
-		if '-' in lang:
-			f.write('\t' + s['if_lang'].format(lang) + '\n')
-			for form, rule in data.items():
+		for form, rule in data.items():
+			part = 'part0' if '-' in lang else 'part1'
+			form = form[17:]
+			if part == 'part0' or form != 'other':
+				if lang not in output[part]:
+					output[part][lang] = {}
 				rule = rewrite_rule(rule)
-				if rule: f.write('\t\t' + s['if_rule'].format(rule) + ' ')
-				else: f.write('\t\t')
-				f.write(s['return_str'].format(form[17:]) + '\n')
+				output[part][lang][form] = rule
 
-	i = 0
-	f.write('\t' + s['lang_cut'] + '\n')
-	for lang, data in cldr[cldr_type].items():
-		if '-' not in lang and len(data) > 1:
-			if i == 0: f.write('\t' + s['if_lang'].format(lang) + '\n')
-			else: f.write('\t' + s['elif_lang'].format(lang) + '\n')
-			for form, rule in data.items():
-				if form[17:] != 'other':
-					rule = rewrite_rule(rule)
-					f.write('\t\t' + s['if_rule'].format(rule) + ' ')
-					f.write(s['return_str'].format(form[17:]) + '\n')
-			i += 1
-
-	f.write('\t' + s['return_str'].format('other') + '\n')
-	f.write(s['block_end'] + '\n')
+	return output
 
 ### samples
 
-def get_samples(lang, data):
+def extract_samples(lang, data):
 	samples = []
 	for form, sample in data.items():
 		if n:= number_re.search(sample.split(' @')[1]):
@@ -130,92 +88,69 @@ def get_samples(lang, data):
 			samples.append((form[17:], number))
 	return samples
 
-def write_samples(f, s, cldr):
-	cldr_type = func_name = ''
+def gen_samples(cldr):
+	output = {
+		'part0': {},
+		'part1': {},
+	}
+
 	if 'plurals-type-cardinal' in cldr.keys():
 		cldr_type = 'plurals-type-cardinal'
-		func_name = 'plural_samples'
+		output['func_name'] = 'plural_samples'
 	if 'plurals-type-ordinal' in cldr.keys():
 		cldr_type = 'plurals-type-ordinal'
-		func_name = 'ordinal_samples'
+		output['func_name'] = 'ordinal_samples'
 
-	f.write(s['func_begin_lang_list'].format(func_name) + '\n')
-
-	f.write('\t' + s['lang_replace'] + '\n')
 	for lang, data in cldr[cldr_type].items():
-		if '-' in lang:
-			samples = get_samples(lang, data)
-			f.write('\t' + s['if_lang'].format(lang) + ' ')
-			f.write(s['return_list'].format(samples) + '\n')
+		for form, rule in data.items():
+			part = 'part0' if '-' in lang else 'part1'
+			if part == 'part0' or form != 'other':
+				output[part][lang] = extract_samples(lang, data)
 
-	f.write('\t' + s['lang_cut'] + '\n')
-	for lang, data in cldr[cldr_type].items():
-		if '-' not in lang:
-			samples = get_samples(lang, data)
-			f.write('\t' + s['if_lang'].format(lang) + ' ')
-			f.write(s['return_list'].format(samples) + '\n')
-
-	f.write('\t' + s['return_list'].format([]) + '\n')
-	f.write(s['block_end'] + '\n')
+	return output
 
 ### format number
 
-def get_number_symbols(lang, path):
-	file = os.path.sep.join([path, 'numbers.json'])
-	symbols = json.load(open(file))['main'][lang]['numbers']['symbols-numberSystem-latn']
-	return {
-		'decimal': symbols['decimal'],
-		'group': symbols['group'],
+def gen_number_symbols(directory):
+	output = {
+		'part0': {},
+		'part1': {},
 	}
 
-def write_number_symbols(f, s, directory):
-	f.write(s['func_begin_lang_dict'].format('number_symbols') + '\n')
-
-	f.write('\t' + s['lang_replace'] + '\n')
 	for path in glob.iglob(directory + '/*'):
 		lang = os.path.basename(path)
-		if '-' in lang:
-			symbols = get_number_symbols(lang, path)
-			f.write('\t' + s['if_lang'].format(lang) + ' ')
-			f.write(s['return_map'].format(symbols) + '\n')
+		part = 'part0' if '-' in lang else 'part1'
+		f = open(os.path.sep.join([path, 'numbers.json']))
+		symbols = json.load(f)['main'][lang]['numbers']['symbols-numberSystem-latn']
+		output[part][lang] = {
+			'decimal': symbols['decimal'],
+			'group': symbols['group'],
+		}
 
-	f.write('\t' + s['lang_cut'] + '\n')
-	for path in glob.iglob(directory + '/*'):
-		lang = os.path.basename(path)
-		if '-' not in lang:
-			symbols = get_number_symbols(lang, path)
-			f.write('\t' + s['if_lang'].format(lang) + ' ')
-			f.write(s['return_map'].format(symbols) + '\n')
-
-	f.write(s['block_end'] + '\n')
+	return output
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('syntax')
+	parser.add_argument('proglang')
 	args = parser.parse_args()
 
-	if args.syntax in syntax:
-		s = syntax[args.syntax]
-	else:
-		quit(1)
-
 	repo_clone_update()
-
-	f = open(files[args.syntax], 'w')
-	f.write('%s  This Source Code Form is subject to the terms of the Mozilla Public\n'
-		% s['comment'])
-	f.write('%s  License, v. 2.0. If a copy of the MPL was not distributed with this\n'
-		% s['comment'])
-	f.write('%s  file, You can obtain one at https://mozilla.org/MPL/2.0/.\n\n' % s['comment'])
-	f.write('%s %s\n\n' % (s['comment'], datetime.date.today()))
 
 	plurals_file = '.cldr-json/cldr-json/cldr-core/supplemental/plurals.json'
 	ordinals_file = '.cldr-json/cldr-json/cldr-core/supplemental/ordinals.json'
 	plurals = json.load(open(plurals_file))['supplemental']
 	ordinals = json.load(open(ordinals_file))['supplemental']
+	numbers_dir = '.cldr-json/cldr-json/cldr-numbers-modern/main'
 
-	write_form(f, s, plurals)
-	write_form(f, s, ordinals)
-	write_samples(f, s, plurals)
-	write_samples(f, s, ordinals)
-	write_number_symbols(f, s, '.cldr-json/cldr-json/cldr-numbers-modern/main')
+	templates = TemplateLookup(directories=['templates'])
+	template = templates.get_template(args.proglang + '.mako')
+	f = open(files[args.proglang], 'w')
+
+	f.write(template.render(**{
+		'datestamp': datetime.date.today(),
+		'plural_form': gen_form(plurals),
+		'ordinal_form': gen_form(ordinals),
+		'plural_samples': gen_samples(plurals),
+		'ordinal_samples': gen_samples(ordinals),
+		'number_symbols': gen_number_symbols(numbers_dir),
+	}))
