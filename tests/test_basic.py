@@ -31,9 +31,10 @@ en.ord = "Take the {} right."
 pl.other = "Skręć w {}. w prawo."
 ''')
 	config = tomllib.loads(f'''
+[jakarta]
 jafile = "{jafile}"
-lang = "python"
-sources = ["{__file__}"]
+[sources]
+python = ["{__file__}"]
 ''')
 	yield Tool(config).main()
 

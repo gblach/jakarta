@@ -21,7 +21,7 @@ class Tool:
 		self.map = {}
 
 	def load(self):
-		f = open(self.config['jafile'])
+		f = open(self.config['jakarta']['jafile'])
 		line_re = re.compile(r'([\w\.]+) = "(.+)"')
 		for line in f.readlines():
 			if m := line_re.match(line):
@@ -43,16 +43,17 @@ class Tool:
 					self.map[text][lang][form] = translation
 
 	def extract(self):
-		for src in self.config['sources']:
-			for fn in glob.glob(src, recursive=True):
-				code = open(fn).read()
-				root = ast_grep_py.SgRoot(code, self.config['lang']).root()
-				nodes = root.find_all(pattern='$O._($A)')
-				self.extract_nodes(fn, nodes, Type.SIMPLE)
-				nodes = root.find_all(pattern='$O.p($A, $B, $N)')
-				self.extract_nodes(fn, nodes, Type.PLURAL)
-				nodes = root.find_all(pattern='$O.o($A, $N)')
-				self.extract_nodes(fn, nodes, Type.ORDINAL)
+		for proglang, patterns in self.config['sources'].items():
+			for pattern in patterns:
+				for fn in glob.glob(pattern, recursive=True):
+					code = open(fn).read()
+					root = ast_grep_py.SgRoot(code, proglang).root()
+					nodes = root.find_all(pattern='$O._($A)')
+					self.extract_nodes(fn, nodes, Type.SIMPLE)
+					nodes = root.find_all(pattern='$O.p($A, $B, $N)')
+					self.extract_nodes(fn, nodes, Type.PLURAL)
+					nodes = root.find_all(pattern='$O.o($A, $N)')
+					self.extract_nodes(fn, nodes, Type.ORDINAL)
 
 	def extract_nodes(self, fn, nodes, _type):
 		for node in nodes:
@@ -69,20 +70,20 @@ class Tool:
 		translated = 0
 		for text, data in self.map.items():
 			if data['_type'] == Type.SIMPLE:
-				for lang in self.config['translate-to']:
+				for lang in self.config['jakarta']['translate-to']:
 					if lang not in self.map[text]:
 						self.translate_simple(lang, text)
 						print('.', end='', flush=True)
 						translated += 1
 			elif data['_type'] == Type.PLURAL:
 				plural = data['_plural']
-				for lang in self.config['translate-to']:
+				for lang in self.config['jakarta']['translate-to']:
 					if lang not in self.map[text]:
 						self.translate_plural(lang, text, plural)
 						print('.', end='', flush=True)
 						translated += 1
 			elif data['_type'] == Type.ORDINAL:
-				for lang in self.config['translate-to']:
+				for lang in self.config['jakarta']['translate-to']:
 					if lang not in self.map[text]:
 						self.translate_oridnal(lang, text)
 						print('.', end='', flush=True)
@@ -118,7 +119,7 @@ class Tool:
 					.replace(str(n).replace('.', ','), '{}')
 
 	def generate(self):
-		f = open(self.config['jafile'], 'w')
+		f = open(self.config['jakarta']['jafile'], 'w')
 		i = 0
 		for text, data in self.map.items():
 			for loc in data['_loc']:
@@ -141,14 +142,14 @@ class Tool:
 						for form, translation in data1.items():
 							key = f'{lang}.{form}'
 							f.write(f'{key} = "{translation}"\n')
-			if 'translate-to' in self.config:
+			if 'translate-to' in self.config['jakarta']:
 				self.generate_not_translated(f, data)
 			i += 1
 			if i < len(self.map):
 				f.write('\n')
 
 	def generate_not_translated(self, f, data):
-		for lang in self.config['translate-to']:
+		for lang in self.config['jakarta']['translate-to']:
 			if data['_type'] == Type.SIMPLE:
 				if lang not in data:
 					f.write(f'{lang} = ""\n')
@@ -164,7 +165,7 @@ class Tool:
 						f.write(f'{lang}.{form} = ""\n')
 
 	def compile(self):
-		cdbfile = self.config['jafile'] + '.cdb'
+		cdbfile = self.config['jakarta']['jafile'] + '.cdb'
 		f = open(cdbfile, 'wb')
 		cdb = cdblib.Writer(f)
 		for text, data in self.map.items():
@@ -181,10 +182,11 @@ class Tool:
 		return cdbfile
 
 	def main(self):
-		if os.path.isfile(self.config['jafile']):
+		if os.path.isfile(self.config['jakarta']['jafile']):
 			self.load()
 		self.extract()
-		if 'translate-to' in self.config and 'translation-engine' in self.config:
-			self.translate()
+		if 'translate-to' in self.config['jakarta'] \
+			and 'translation-engine' in self.config['jakarta']:
+				self.translate()
 		self.generate()
 		return self.compile()

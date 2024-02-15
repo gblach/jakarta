@@ -41,9 +41,9 @@ ENGINES = {
 }
 
 def translate(config: str, lang: str, text: str):
-	engine = ENGINES[config['translation-engine']]
-	if config['translation-engine'] in config:
-		for k, v in config[config['translation-engine']].items():
+	engine = ENGINES[config['jakarta']['translation-engine']]
+	if config['jakarta']['translation-engine'] in config:
+		for k, v in config[config['jakarta']['translation-engine']].items():
 			engine[k] = v
 	url = Template(engine['url']).substitute(
 		host=engine['host'],

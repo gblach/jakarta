@@ -12,11 +12,12 @@ from jakarta.tool import Tool
 def cdbfile(tmp_path_factory):
 	jafile = str(tmp_path_factory.mktemp('lingva') / (Path(__file__).stem + '.ja'))
 	config = tomllib.loads(f'''
+[jakarta]
 jafile = "{jafile}"
-lang = "python"
-sources = ["{__file__}"]
 translate-to = [ "id", "mt", "pl", "pt", "tr" ]
 translation-engine = "lingva"
+[sources]
+python = ["{__file__}"]
 ''')
 	yield Tool(config).main()
 
