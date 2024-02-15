@@ -2,12 +2,12 @@
 #  License, v. 2.0. If a copy of the MPL was not distributed with this
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
-import cdblib
+import cdblib, os
 from . import generated as gen
 
 class Jakarta:
 	def __init__(self, cdbfile=None):
-		if cdbfile:
+		if cdbfile and os.path.isfile(cdbfile):
 			data = open(cdbfile, 'rb').read()
 			self.map = cdblib.Reader(data)
 		else:

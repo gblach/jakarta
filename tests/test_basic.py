@@ -123,3 +123,10 @@ def test_number_format():
 	ja.set_langs('xx')
 	assert ja.n(123456789) == '123,456,789'
 	assert ja.n(1234567.89) == '1,234,567.89'
+
+def test_no_cdbfile(cdbfile):
+	ja = Jakarta(cdbfile + '.does_no_exist')
+	ja.set_langs('en')
+	assert ja._('Hello world') == 'Hello world'
+	ja.set_langs('pl')
+	assert ja._('Hello world') == 'Hello world'
