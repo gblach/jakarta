@@ -1,0 +1,49 @@
+----- en -----
+Hello World!
+1 month
+2 months
+Take the 1st right.
+Take the 2nd right.
+1,234,567.89
+----- fr -----
+Bonjour le monde !
+1 mois
+2 mois
+Prendre la 1ère à droite.
+Prendre la 2e à droite.
+1 234 567,89
+----- id -----
+Hello World!
+1 bulan
+2 bulan
+Ambil belokan ke kanan ke-1.
+Ambil belokan ke kanan ke-2.
+1.234.567,89
+----- nl -----
+Hallo Wereld!
+1 maand
+2 maanden
+Neem de 1e rechts.
+Neem de 2e rechts.
+1.234.567,89
+----- pl -----
+Hello World!
+1 miesiąc
+2 miesiące
+Skręć w 1. w prawo.
+Skręć w 2. w prawo.
+1 234 567,89
+----- pt -----
+Olá mundo!
+1 mês
+2 meses
+Vire na 1ª à direita.
+Vire na 2ª à direita.
+1.234.567,89
+----- tr -----
+Merhaba Dünya!
+1 ay
+2 ay
+1. sağdan girin.
+2. sağdan girin.
+1.234.567,89

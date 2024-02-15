@@ -1,0 +1,34 @@
+[jakarta]
+# A path to a file containing all extracted strings and translations in human readable form.
+# This file is compiled to jafile + '.cdb', which has a machine-friendly format.
+jafile = "hello_world.ja"
+
+# List of languages the application needs to be translated into.
+# Except English, since English is always a base language for source code.
+translate-to = [ "fr", "id", "nl", "pl", "pt", "tr" ]
+
+# Name of the translation engine you'd like to use for automatic translation.
+translation-engine = "mozhi"
+
+# Lists of source files to scan. The key is always a programming language name.
+# The value is a list of globs for source files written in that language.
+[sources]
+python = [ "*.py" ]
+
+# Lingva is an open source frontend for Google Translate.
+# When using this engine, you can change the host you connect to.
+# Full list of hosts can be found at https://github.com/thedaviddelta/lingva-translate
+[lingva]
+host = "lingva.lunar.icu"
+
+# Mozhi is an open source frontend for multiple translation engines.
+# When using this engine, you can change host and backend engine.
+# Full list of hosts and supported engines can be found at https://codeberg.org/aryak/mozhi
+[mozhi]
+host = "translate.bus-hit.me"
+engine = "deepl"
+
+# MinT is an open source translation engine maintained by WikiMedia.
+# The host parameter is useful if you are running this translation engine on your own.
+[mint]
+host = "translate.wmcloud.org"
