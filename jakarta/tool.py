@@ -3,7 +3,6 @@
 #  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 
 import glob, os, re
-import importlib.util
 import ast_grep_py
 import cdblib
 from enum import Enum
