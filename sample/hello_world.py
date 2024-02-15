@@ -10,7 +10,7 @@ for lang in [ "en", "fr", "id", "nl", "pl", "pt", "tr" ]:
 	# Set the language or languages you'd like to use for display.
 	# If you set more than one language, the first one found will be used.
 	# To do this, pass languages as additional arguments,
-	# e.g. ja_set_langs('en', 'fr', 'id', 'nl', 'pl', 'pt', 'tr')
+	# e.g. ja.set_langs('en', 'fr', 'id', 'nl', 'pl', 'pt', 'tr')
 	ja.set_langs(lang)
 
 	print(f'----- {lang} -----')
