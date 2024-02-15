@@ -42,9 +42,9 @@ class Tool:
 					self.map[text][lang][form] = translation
 
 	def extract(self):
-		for proglang, patterns in self.config['sources'].items():
-			for pattern in patterns:
-				for fn in glob.glob(pattern, recursive=True):
+		for proglang, pathnames in self.config['sources'].items():
+			for pathname in pathnames:
+				for fn in glob.glob(pathname, recursive=True):
 					code = open(fn).read()
 					root = ast_grep_py.SgRoot(code, proglang).root()
 					nodes = root.find_all(pattern='$O._($A)')
