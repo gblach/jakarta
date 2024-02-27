@@ -1,0 +1,39 @@
+# hello_world.py:19
+en = "Hello World!"
+fr = "Bonjour le monde !"
+id = "Hello World!"
+nl = "Hallo Wereld!"
+pl = "Hello World!"
+pt = "Olá mundo!"
+tr = "Merhaba Dünya!"
+
+# hello_world.py:22
+# hello_world.py:23
+en.one = "{} month"
+en.other = "{} months"
+fr.one = "{} mois"
+fr.many = "{} mois"
+fr.other = "{} mois"
+id.other = "{} bulan"
+nl.one = "{} maand"
+nl.other = "{} maanden"
+pl.one = "{} miesiąc"
+pl.few = "{} miesiące"
+pl.many = "{} miesięcy"
+pl.other = "{} miesiąca"
+pt.one = "{} mês"
+pt.many = "{} meses"
+pt.other = "{} meses"
+tr.one = "{} ay"
+tr.other = "{} ay"
+
+# hello_world.py:26
+# hello_world.py:27
+en.ord = "Take the {} right."
+fr.one = "Prendre la {}ère à droite."
+fr.other = "Prendre la {}e à droite."
+id.other = "Ambil belokan ke kanan ke-{}."
+nl.other = "Neem de {}e rechts."
+pl.other = "Skręć w {}. w prawo."
+pt.other = "Vire na {}ª à direita."
+tr.other = "{}. sağdan girin."
